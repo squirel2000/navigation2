@@ -336,6 +336,7 @@ Costmap2DROS::getParameters()
   filter_types_.resize(filter_names_.size());
 
   // 1. All plugins must have 'plugin' param defined in their namespace to define the plugin type
+  // plugins: ["static_layer", "obstacle_layer", "voxel_layer", "inflation_layer"]
   for (size_t i = 0; i < plugin_names_.size(); ++i) {
     plugin_types_[i] = nav2_util::get_plugin_type_param(node, plugin_names_[i]);
   }

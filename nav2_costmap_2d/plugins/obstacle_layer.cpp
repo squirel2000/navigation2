@@ -149,7 +149,7 @@ void ObstacleLayer::onInitialize()
     declareParameter(source + "." + "raytrace_max_range", rclcpp::ParameterValue(3.0));
     declareParameter(source + "." + "raytrace_min_range", rclcpp::ParameterValue(0.0));
 
-    node->get_parameter(name_ + "." + source + "." + "topic", topic);
+    node->get_parameter(name_ + "." + source + "." + "topic", topic); // obstacle_layer.scan./scan
     node->get_parameter(name_ + "." + source + "." + "sensor_frame", sensor_frame);
     node->get_parameter(
       name_ + "." + source + "." + "observation_persistence",
@@ -157,7 +157,7 @@ void ObstacleLayer::onInitialize()
     node->get_parameter(
       name_ + "." + source + "." + "expected_update_rate",
       expected_update_rate);
-    node->get_parameter(name_ + "." + source + "." + "data_type", data_type);
+    node->get_parameter(name_ + "." + source + "." + "data_type", data_type); // data_type: "LaserScan"
     node->get_parameter(name_ + "." + source + "." + "min_obstacle_height", min_obstacle_height);
     node->get_parameter(name_ + "." + source + "." + "max_obstacle_height", max_obstacle_height);
     node->get_parameter(name_ + "." + source + "." + "inf_is_valid", inf_is_valid);
@@ -174,13 +174,13 @@ void ObstacleLayer::onInitialize()
 
     // get the obstacle range for the sensor
     double obstacle_max_range, obstacle_min_range;
-    node->get_parameter(name_ + "." + source + "." + "obstacle_max_range", obstacle_max_range);
+    node->get_parameter(name_ + "." + source + "." + "obstacle_max_range", obstacle_max_range); // 6.0
     node->get_parameter(name_ + "." + source + "." + "obstacle_min_range", obstacle_min_range);
 
     // get the raytrace ranges for the sensor
     double raytrace_max_range, raytrace_min_range;
     node->get_parameter(name_ + "." + source + "." + "raytrace_min_range", raytrace_min_range);
-    node->get_parameter(name_ + "." + source + "." + "raytrace_max_range", raytrace_max_range);
+    node->get_parameter(name_ + "." + source + "." + "raytrace_max_range", raytrace_max_range); // 6.5
 
 
     RCLCPP_DEBUG(
@@ -440,15 +440,14 @@ ObstacleLayer::updateBounds(
   }
 
   // place the new obstacles into a priority queue... each with a priority of zero to begin with
-  for (std::vector<Observation>::const_iterator it = observations.begin();
-    it != observations.end(); ++it)
+  for (std::vector<Observation>::const_iterator it = observations.begin();    it != observations.end(); ++it)
   {
     const Observation & obs = *it;
 
     const sensor_msgs::msg::PointCloud2 & cloud = *(obs.cloud_);
 
-    double sq_obstacle_max_range = obs.obstacle_max_range_ * obs.obstacle_max_range_;
-    double sq_obstacle_min_range = obs.obstacle_min_range_ * obs.obstacle_min_range_;
+    double sq_obstacle_max_range = obs.obstacle_max_range_ * obs.obstacle_max_range_; // 6.0 * 6.0
+    double sq_obstacle_min_range = obs.obstacle_min_range_ * obs.obstacle_min_range_; // 0.0 * 0.0
 
     sensor_msgs::PointCloud2ConstIterator<float> iter_x(cloud, "x");
     sensor_msgs::PointCloud2ConstIterator<float> iter_y(cloud, "y");
@@ -470,10 +469,9 @@ ObstacleLayer::updateBounds(
       }
 
       // compute the squared distance from the hitpoint to the pointcloud's origin
-      double sq_dist =
-        (px -
-        obs.origin_.x) * (px - obs.origin_.x) + (py - obs.origin_.y) * (py - obs.origin_.y) +
-        (pz - obs.origin_.z) * (pz - obs.origin_.z);
+      double sq_dist = (px - obs.origin_.x) * (px - obs.origin_.x) +
+                       (py - obs.origin_.y) * (py - obs.origin_.y) +
+                       (pz - obs.origin_.z) * (pz - obs.origin_.z);
 
       // if the point is far enough away... we won't consider it
       if (sq_dist >= sq_obstacle_max_range) {
@@ -506,9 +504,7 @@ ObstacleLayer::updateBounds(
 void
 ObstacleLayer::updateFootprint(
   double robot_x, double robot_y, double robot_yaw,
-  double * min_x, double * min_y,
-  double * max_x,
-  double * max_y)
+  double * min_x, double * min_y,  double * max_x,  double * max_y)
 {
   if (!footprint_clearing_enabled_) {return;}
   transformFootprint(robot_x, robot_y, robot_yaw, getFootprint(), transformed_footprint_);
@@ -519,11 +515,7 @@ ObstacleLayer::updateFootprint(
 }
 
 void
-ObstacleLayer::updateCosts(
-  nav2_costmap_2d::Costmap2D & master_grid, int min_i, int min_j,
-  int max_i,
-  int max_j)
-{
+ObstacleLayer::updateCosts(  nav2_costmap_2d::Costmap2D & master_grid, int min_i, int min_j,  int max_i,  int max_j) {
   std::lock_guard<Costmap2D::mutex_t> guard(*getMutex());
   if (!enabled_) {
     return;
