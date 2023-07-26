@@ -42,7 +42,7 @@ NavigateThroughPosesNavigator::configure(
 
   path_blackboard_id_ = node->get_parameter("path_blackboard_id").as_string();
 
-  // Odometry smoother object for getting current speed
+  // Odometry smoother object for getting current speed for estimating the elapsed time and distance
   odom_smoother_ = odom_smoother;
 
   return true;
