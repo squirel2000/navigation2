@@ -231,7 +231,7 @@ global_costmap:
       use_sim_time: True
       robot_radius: 0.22
       resolution: 0.05
-      track_unknown_space: true
+      track_unknown_space: false  # If false, treats unknown space as free space, else as unknown space. (Exploration for SLAM)
       plugins: ["static_layer", "obstacle_layer", "inflation_layer"]
       obstacle_layer:
         plugin: "nav2_costmap_2d::ObstacleLayer"
@@ -281,6 +281,8 @@ planner_server:
       tolerance: 0.25
       use_astar: false
       allow_unknown: true
+      # plugin: "nav2_straightline_planner/StraightLine"
+      # interpolation_resolution: 0.1
 
 smoother_server:
   ros__parameters:
