@@ -13,7 +13,7 @@
           <RateController hz="0.333">
             <RecoveryNode number_of_retries="1" name="ComputePathThroughPoses">
               <ReactiveSequence>
-                <RemovePassedGoals input_goals="{goals}" output_goals="{goals}" radius="0.7"/>
+                <RemovePassedGoals input_goals="{goals}" output_goals="{goals}" radius="0.5"/>
                 <ComputePathThroughPoses goals="{goals}" path="{path}" planner_id="GridBased"/>
                 <!-- <TruncatePathLocal input_path="{path}" output_path="{path}" distance_forward="1.0" distance_backward="3.5" robot_frame="base_link"/> -->
                 <!-- <TruncatePathLocal path="{path}" distance="5" path="{path}"/> -->
