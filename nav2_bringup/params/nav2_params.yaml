@@ -99,6 +99,9 @@ bt_navigator:
       - nav2_assisted_teleop_cancel_bt_node
       - nav2_drive_on_heading_cancel_bt_node
       - nav2_is_battery_charging_condition_bt_node
+    error_code_names:
+      - compute_path_error_code
+      - follow_path_error_code
 
 bt_navigator_navigate_through_poses_rclcpp_node:
   ros__parameters:
@@ -262,7 +265,7 @@ map_server:
     use_sim_time: True
     # Overridden in launch by the "map" launch configuration or provided default value.
     # To use in yaml, remove the default "map" value in the tb3_simulation_launch.py file & provide full path to map below.
-    yaml_filename: ""
+    yaml_filename: "/home/asus/nav2_ws/src/aws-robomaker-small-warehouse-world/maps/005/map.yaml"
 
 map_saver:
   ros__parameters:
@@ -349,3 +352,39 @@ velocity_smoother:
     odom_duration: 0.1
     deadband_velocity: [0.0, 0.0, 0.0]
     velocity_timeout: 1.0
+
+route_server:
+  ros__parameters:
+
+    base_frame: "base_link"                       # Robot's base frame
+    route_frame: "map"                            # Global reference frame
+    path_density: 0.05                            # Density of points for generating the dense nav_msgs/Path from route (m)
+    max_iterations: 0                             # Maximum number of search iterations, if 0, uses maximum possible
+    max_planning_time: 2.0                        # Maximum planning time (seconds)
+
+    graph_file_loader: "GeoJsonGraphFileLoader"   # Name of default file loader
+    plugin: nav2_route::GeoJsonGraphFileLoader    # file loader plugin to use 
+    graph_filepath: "/home/asus/nav2_ws/src/navigation2/nav2_route/graphs/aws_graph.geojson"                            # file path to graph to use
+
+    edge_cost_functions: ["DistanceScorer", "AdjustEdgesScorer"]  # Edge scoring cost functions to use
+    DistanceScorer:
+      plugin: "nav2_route::DistanceScorer" 
+    AdjustEdgesScorer:
+      plugin: "nav2_route::AdjustEdgesScorer"
+
+    operations: ["AdjustSpeedLimit", "ReroutingService"] # Route operations plugins to use
+    AdjustSpeedLimit:
+      plugin: "nav2_route::AdjustSpeedLimit"
+    ReroutingService:
+      plugin: "nav2_route::ReroutingService"
+    use_feedback_operations: True                 # Whether operations may be triggered on feedback message publication rather than in the server itself. This allows operations in the graph that don't exist as plugins to not throw an error. 
+
+    tracker_update_rate: 50.0                     # Rate at which to check the status of path tracking
+    aggregate_blocked_ids: false                  # Whether to aggregate the blocked IDs reported by route operations over the lifespan of the navigation request or only use the currently blocked IDs.
+    boundary_radius_to_achieve_node: 1.0          # Radius (m) near boundary nodes (e.g. start/end) to enable evaluation of achievement metric
+    radius_to_achieve_node: 2.0                   # Radius (m) near route nodes as preliminary condition for evaluation of achievement metric
+
+    max_dist_from_edge: 8.0                       # Max distance from an edge to consider pruning it as in-progress (e.g. if we're too far away from the edge, its nonsensical to prune it)
+    min_dist_from_goal: 0.15                      # Min distance from goal node away from goal pose to consider goal node pruning as considering it as being passed (in case goal pose is very close to a goal node, but not exact)
+    min_dist_from_start: 0.10                     # Min distance from start node away from start pose to consider start node pruning as considering it as being passed (in case start pose is very close to a start node, but not exact)
+    prune_goal: true                              # Whether pruning the goal node from the route due to being past the goal pose requested is possible (pose requests only)

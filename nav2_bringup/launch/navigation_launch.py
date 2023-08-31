@@ -43,11 +43,11 @@ def generate_launch_description():
     lifecycle_nodes = ['controller_server',
                        'smoother_server',
                        'planner_server',
+                       'route_server',
                        'behavior_server',
                        'bt_navigator',
                        'waypoint_follower',
-                       'velocity_smoother',
-                       'collision_monitor']
+                       'velocity_smoother']
 
     # Map fully qualified names to relative ones so the node's namespace can be prepended.
     # In case of the transforms (tf), currently, there doesn't seem to be a better alternative
@@ -140,6 +140,16 @@ def generate_launch_description():
                 arguments=['--ros-args', '--log-level', log_level],
                 remappings=remappings),
             Node(
+                package='nav2_route',
+                executable='route_server',
+                name='route_server',
+                output='screen',
+                respawn=use_respawn,
+                respawn_delay=2.0,
+                parameters=[configured_params],
+                arguments=['--ros-args', '--log-level', log_level],
+                remappings=remappings),
+            Node(
                 package='nav2_behaviors',
                 executable='behavior_server',
                 name='behavior_server',
@@ -179,18 +189,7 @@ def generate_launch_description():
                 parameters=[configured_params],
                 arguments=['--ros-args', '--log-level', log_level],
                 remappings=remappings +
-                        [('cmd_vel', 'cmd_vel_nav'), ('cmd_vel_smoothed', 'cmd_vel_smoothed')]),
-            Node(
-                package='nav2_collision_monitor',
-                executable='collision_monitor',
-                name='collision_monitor',
-                output='screen',
-                respawn=use_respawn,
-                respawn_delay=2.0,
-                parameters=[configured_params],
-                arguments=['--ros-args', '--log-level', log_level],
-                remappings=remappings + 
-                        [('cmd_vel_raw', 'cmd_vel_smoothed'), ('cmd_vel', 'cmd_vel')]),
+                        [('cmd_vel', 'cmd_vel_nav'), ('cmd_vel_smoothed', 'cmd_vel')]),
             Node(
                 package='nav2_lifecycle_manager',
                 executable='lifecycle_manager',
@@ -225,6 +224,12 @@ def generate_launch_description():
                 name='planner_server',
                 parameters=[configured_params],
                 remappings=remappings),
+	        ComposableNode(
+                package='nav2_route',
+                plugin='nav2_route::RouteServer',
+                name='route_server',
+                parameters=[configured_params],
+                remappings=remappings),
             ComposableNode(
                 package='nav2_behaviors',
                 plugin='behavior_server::BehaviorServer',
@@ -249,15 +254,7 @@ def generate_launch_description():
                 name='velocity_smoother',
                 parameters=[configured_params],
                 remappings=remappings +
-                        [('cmd_vel', 'cmd_vel_nav'), ('cmd_vel_smoothed', 'cmd_vel_smoothed')]),
-            ComposableNode(
-                package='nav2_collision_monitor',
-                # The name of the plugin is defined in /nav2_collision_monitor/CMakeLists.txt, rclcpp_components_register_nodes(${library_name} "nav2_collision_monitor::CollisionMonitor")
-                plugin='nav2_collision_monitor::CollisionMonitor',
-                name='collision_monitor',
-                parameters=[configured_params],
-                remappings=remappings +
-                        [('cmd_vel_raw', 'cmd_vel_smoothed'), ('cmd_vel', 'cmd_vel')]),
+                        [('cmd_vel', 'cmd_vel_nav'), ('cmd_vel_smoothed', 'cmd_vel')]),
             ComposableNode(
                 package='nav2_lifecycle_manager',
                 plugin='nav2_lifecycle_manager::LifecycleManager',
