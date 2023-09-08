@@ -100,7 +100,7 @@ protected:
 
   /**
    * @brief Adds a node to the priority queue for search
-   * @param cost Priority level
+   * @param cost Priority level (distance from start node)
    * @param node Node pointer to insert
    */
   inline void addNode(const float cost, const NodePtr node);

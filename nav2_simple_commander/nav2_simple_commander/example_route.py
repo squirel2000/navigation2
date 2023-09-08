@@ -93,9 +93,9 @@ def main():
             if not last_feedback or \
                 (feedback.last_node_id != last_feedback.last_node_id or \
                     feedback.next_node_id != last_feedback.next_node_id):
-                print('Passed node ' + str(feedback.last_node_id) +
-                      ' to next node ' + str(feedback.next_node_id) +
-                      ' along edge ' + str(feedback.current_edge_id) + '.')
+                print(
+                    f'Passed node {feedback.last_node_id} to next node {feedback.next_node_id} along edge {feedback.current_edge_id}.'
+                )
 
             last_feedback = feedback
 

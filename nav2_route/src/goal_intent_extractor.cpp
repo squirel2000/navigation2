@@ -100,6 +100,7 @@ GoalIntentExtractor::findStartandGoal(const std::shared_ptr<const GoalT> goal)
 
   // Find request start pose
   geometry_msgs::msg::PoseStamped start_pose, goal_pose = goal->goal;
+  std::cout << "use_start: " << goal->use_start << "; start: " << start_pose.pose.position.x << "; goal: " << goal_pose.pose.position.x << std::endl;
   if (goal->use_start) {
     start_pose = goal->start;
   } else {

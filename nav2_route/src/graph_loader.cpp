@@ -92,7 +92,7 @@ bool GraphLoader::loadGraphFromFile(
     return false;
   }
 
-  return true;
+    return true;
 }
 
 bool GraphLoader::transformGraph(Graph & graph)

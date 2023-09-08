@@ -86,7 +86,6 @@ class BasicNavigator(Node):
         self.compute_and_track_route_client = ActionClient(self, ComputeAndTrackRoute,
                                                            'compute_and_track_route')
 
-
         self.spin_client = ActionClient(self, Spin, 'spin')
         self.backup_client = ActionClient(self, BackUp, 'backup')
         self.assisted_teleop_client = ActionClient(self, AssistedTeleop, 'assisted_teleop')
@@ -129,7 +128,7 @@ class BasicNavigator(Node):
         self._setInitialPose()
 
     def goThroughPoses(self, poses, behavior_tree=''):
-        """Send a `NavThroughPoses` action request."""
+        """Send a `NavThroughPoses` action request and waits for completion """
         self.debug("Waiting for 'NavigateThroughPoses' action server")
         while not self.nav_through_poses_client.wait_for_server(timeout_sec=1.0):
             self.info("'NavigateThroughPoses' action server not available, waiting...")
@@ -152,7 +151,7 @@ class BasicNavigator(Node):
         return True
 
     def goToPose(self, pose, behavior_tree=''):
-        """Send a `NavToPose` action request."""
+        """Send a `NavToPose` action request and waits for completion."""
         self.debug("Waiting for 'NavigateToPose' action server")
         while not self.nav_to_pose_client.wait_for_server(timeout_sec=1.0):
             self.info("'NavigateToPose' action server not available, waiting...")
@@ -161,16 +160,13 @@ class BasicNavigator(Node):
         goal_msg.pose = pose
         goal_msg.behavior_tree = behavior_tree
 
-        self.info('Navigating to goal: ' + str(pose.pose.position.x) + ' ' +
-                  str(pose.pose.position.y) + '...')
-        send_goal_future = self.nav_to_pose_client.send_goal_async(goal_msg,
-                                                                   self._feedbackCallback)
+        self.info( f'Navigating to goal: {str(pose.pose.position.x)} {str(pose.pose.position.y)}...' )
+        send_goal_future = self.nav_to_pose_client.send_goal_async(goal_msg, self._feedbackCallback)
         rclpy.spin_until_future_complete(self, send_goal_future)
         self.goal_handle = send_goal_future.result()
 
         if not self.goal_handle.accepted:
-            self.error('Goal to ' + str(pose.pose.position.x) + ' ' +
-                       str(pose.pose.position.y) + ' was rejected!')
+            self.error( f'Goal to {str(pose.pose.position.x)} {str(pose.pose.position.y)} was rejected!' )
             return False
 
         self.result_future = self.goal_handle.get_result_async()
@@ -314,7 +310,7 @@ class BasicNavigator(Node):
             # Timed out, still processing, not complete yet
             return False
 
-        self.debug('Task succeeded!')
+        self.info('Task succeeded!')
         return True
 
     def getFeedback(self, trackingRoute=False):
@@ -389,10 +385,7 @@ class BasicNavigator(Node):
             self.warn(f'Getting path failed with status code: {self.status}')
             return None
 
-        if not rtn:
-            return None
-        else:
-            return rtn.path
+        return rtn.path if rtn else None
 
     def _getRouteImpl(self, start, goal, use_start=False):
         """
@@ -440,11 +433,7 @@ class BasicNavigator(Node):
             self.warn(f'Getting path failed with status code: {self.status}')
             return None
 
-        if not rtn:
-            return None
-        else:
-            return [rtn.path, rtn.route]
-
+        return [rtn.path, rtn.route] if rtn else None
 
     def getAndTrackRoute(self, start, goal, use_start=False):
         """Send a `ComputeAndTrackRoute` action request."""
@@ -467,7 +456,7 @@ class BasicNavigator(Node):
 
         self.info('Computing and tracking route...')
         send_goal_future = self.compute_and_track_route_client.send_goal_async(goal_msg,
-                                                                   self._routeFeedbackCallback)
+                                                                               self._routeFeedbackCallback)
         rclpy.spin_until_future_complete(self, send_goal_future)
         self.route_goal_handle = send_goal_future.result()
 
@@ -517,10 +506,7 @@ class BasicNavigator(Node):
             self.warn(f'Getting path failed with status code: {self.status}')
             return None
 
-        if not rtn:
-            return None
-        else:
-            return rtn.path
+        return rtn.path if rtn else None
 
     def _smoothPathImpl(self, path, smoother_id='', max_duration=2.0, check_for_collision=False):
         """
@@ -565,10 +551,7 @@ class BasicNavigator(Node):
             self.warn(f'Getting path failed with status code: {self.status}')
             return None
 
-        if not rtn:
-            return None
-        else:
-            return rtn.path
+        return rtn.path if rtn else None
 
     def changeMap(self, map_filepath):
         """Change the current static map in the map server."""

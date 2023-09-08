@@ -58,6 +58,11 @@ bool GeoJsonGraphFileLoader::loadGraphFromFile(
     return false;
   }
 
+  // Print out the size of nodes and edges
+  RCLCPP_INFO(
+    logger_, "%s is successfully loaded with %ld nodes and %ld edges.",
+    filepath.c_str(), nodes.size(), edges.size());
+
   graph.resize(nodes.size());
   addNodesToGraph(graph, graph_to_id_map, nodes);
   addEdgesToGraph(graph, graph_to_id_map, edges);
